@@ -9,7 +9,7 @@ import (
 	"github.com/akihiro/vermouth"
 )
 
-var Message string
+var Message string = "Hello, world!"
 
 func init() {
 	flag.StringVar(&Message, "message", Message, "response message")
