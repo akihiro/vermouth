@@ -15,8 +15,13 @@ func startServer(h http.Handler) (*http.Server, error) {
 
 	srv := &http.Server{Handler: h}
 	go func() {
-		log.Print("Start Server")
-		log.Print(srv.Serve(ln))
+		if cert != "" {
+			log.Print("Start TLS Server")
+			log.Print(srv.ServeTLS(ln, cert, key))
+		} else {
+			log.Print("Start Plaintext Server")
+			log.Print(srv.Serve(ln))
+		}
 	}()
 
 	return srv, nil

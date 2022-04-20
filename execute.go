@@ -2,6 +2,7 @@ package vermouth
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"log"
 	"net/http"
@@ -12,12 +13,16 @@ import (
 )
 
 var (
+	cert     string
+	key      string
 	listen   string
 	monitor  string
 	shutdown time.Duration
 )
 
 func init() {
+	flag.StringVar(&cert, "cert", "", "TLS Cetificate file")
+	flag.StringVar(&key, "key", "", "TLS private key")
 	flag.StringVar(&listen, "listen", "[::]:5000", "listen addr")
 	flag.StringVar(&monitor, "monitor", "", "monitor addr")
 	flag.DurationVar(&shutdown, "shutdown", time.Second, "graceful shutdown timeout")
@@ -31,6 +36,22 @@ func Parse() {
 		}
 	})
 	flag.Parse()
+
+	if cert != "" {
+		if _, err := os.Stat(cert); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				log.Fatalf("cert not found: %s", cert)
+			}
+		}
+		if key == "" {
+			log.Fatal("key perameter required")
+		}
+		if _, err := os.Stat(key); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				log.Fatalf("key not found: %s", key)
+			}
+		}
+	}
 }
 
 func Execute(h http.Handler) error {
